@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pantalla del Trabajador - Car Wash</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="Imagenes/icono3.png" type="image">
+</head>
+<body>
+    <div class="top-bar">
+        <a href="Trabajador.html"><img src="Imagenes/logo2.jpg" alt="Logo"></a>
+        <div class="links">
+            <a href="#"><Strong>Ayuda</Strong></a>
+            <a href="Login.html"><strong>Inicio de Sesión</strong></a>
+        </div>
+    </div>
+    <div class="navbar">
+        <ul>
+            <li><a href="Trabajador.html"><strong>Encargos</strong></a></li>
+        </ul>
+    </div>
+    <div id="ordenes-container"></div>
+
+    <div class="footer">
+        © 2025 Car Wash - Todos los derechos reservados.
+    </div>
+
+    <script>
+        function cargarOrdenesTrabajo() {
+            const contenedor = document.getElementById("ordenes-container");
+            const citas = JSON.parse(localStorage.getItem("citas_trabajador")) || [];
+        
+            if (citas.length === 0) {
+                contenedor.innerHTML = "<p>No hay citas agendadas aún.</p>";
+                return;
+            }
+        
+            citas.forEach((cita, index) => {
+                if (cita.completado) return; // Con esto imitimos trabajos completados, a fin de cuentas solo importan en el administrador.
+        
+                const ordenHTML = document.createElement("div");
+                ordenHTML.className = "container-2";
+                ordenHTML.innerHTML = `
+                    <h2>Orden de Trabajo</h2>
+                    <div class="container-3">
+                        <h3>Pedido #${index + 1}</h3>
+                        <p><strong>Cliente:</strong> ${cita.cliente}</p>
+                        <p><strong>Tratamiento:</strong> ${formatearTratamiento(cita.tratamiento)}</p>
+                        <p><strong>Fecha:</strong> ${cita.fecha}</p>
+                        <p><strong>Hora:</strong> ${cita.hora}</p>
+                        <p><strong>Tiempo estimado:</strong> ${cita.tiempoEstimado}</p>
+                        <label><input type="checkbox" onchange="confirmarCompletado(${index}, this, this.closest('.container-2'))"> Marcar como completado</label>
+                        <p class="mensajeConfirmacion" style="display: none; font-weight: bold;"></p>
+                        <button onclick="actualizarEstado(${index})">Actualizar Estado</button>
+                    </div>
+                `;
+                contenedor.appendChild(ordenHTML);
+            });
+        }
+        
+        function confirmarCompletado(index, checkbox, divOrden) {
+            let citas = JSON.parse(localStorage.getItem("citas_trabajador")) || [];
+            let cita = citas[index];
+            let mensaje = divOrden.querySelector(".mensajeConfirmacion");
+        
+            if (checkbox.checked) {
+    // Obtener fecha y hora actual, mejorado por ChatGPT puesto que el operador inicial me fallaba por no ser valido.
+            const fechaAhora = new Date();
+            const fechaFormateada = fechaAhora.toLocaleDateString('es-ES');
+            const horaFormateada = fechaAhora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+            cita.completado = true;
+            cita.fechaFinalizacion = `${fechaFormateada} ${horaFormateada}`;
+
+            localStorage.setItem("citas_trabajador", JSON.stringify(citas));
+
+            notificarUsuario(cita);
+
+    // Mostrar mensaje y agregar clase visual, Proveido por ChatGPT para mejor diseño
+            mensaje.textContent = `✔️ Trabajo concretado el ${cita.fechaFinalizacion}`;
+            mensaje.style.color = "green";
+            mensaje.style.display = "block";
+
+    // Agrega una clase para efecto visual (opcional), Proveido por ChatGPT para mejor diseño
+            divOrden.classList.add("orden-completada");
+
+            setTimeout(() => {
+                divOrden.remove();
+            }, 1500);
+
+            let historial = JSON.parse(localStorage.getItem("citas")) || [];
+            historial.push(cita);
+            localStorage.setItem("citas", JSON.stringify(historial));
+        }
+        else {
+                mensaje.textContent = "❗ Por favor, marque la casilla para confirmar.";
+                mensaje.style.color = "red";
+                mensaje.style.display = "block";
+        
+                setTimeout(() => {
+                    mensaje.style.display = "none";
+                }, 3000);
+            }
+        }
+        
+        //En base al id proveemos que se actualizo su estado a completado, apoyado por David
+        function notificarUsuario(cita) {
+            let cliente = cita.cliente;
+            let citasUsuario = JSON.parse(localStorage.getItem("citas_" + cliente)) || [];
+
+            citasUsuario = citasUsuario.map(c => {
+                if (c.id === cita.id) { // 🎯 Usamos el ID para encontrarla
+                    c.completado = true;
+                    c.fechaFinalizacion = cita.fechaFinalizacion;
+                    c.mensaje = "Tu cita ha sido completada. ¡Gracias por visitarnos!";
+                }
+                return c;
+            });
+
+            localStorage.setItem("citas_" + cliente, JSON.stringify(citasUsuario));
+        }
+        
+        function actualizarEstado(index) {
+            alert("Estado actualizado para el pedido #" + (index + 1));
+        }
+        
+        function formatearTratamiento(t) {
+            const map = {
+                "normal": "Lavado Normal",
+                "cera": "Lavado con Cera",
+                "asiento": "Lavado de Asientos",
+                "alfombra": "Lavado de Alfombras",
+                "motor": "Lavado de Motor",
+                "faros": "Pulido de Faros",
+                "techo": "Lavado de Techo",
+                "detallado": "Detallado Completo"
+            };
+            return map[t] || t;
+        }
+        window.onload = cargarOrdenesTrabajo;
+</script>
+</body>
+</html>

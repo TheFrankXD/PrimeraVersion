@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio de Sesión</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="Imagenes/icono3.png" type="image">
+</head>
+<body class="body-2">
+    <div class="login-container">
+        <h2>Iniciar Sesión</h2>
+        <form id="loginForm">
+            <input type="text" id="username" placeholder="Usuario" required>
+            <input type="password" id="contraseña" placeholder="Contraseña" required>
+            <button type="submit">Ingresar</button>
+            <p class="error" id="mensajeError"></p>
+        </form>
+        <p>¿No tienes cuenta? <a href="Registro.html">Crear una cuenta</a></p>
+    </div>
+    <script>
+        //Validación del Login
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById("username").value;
+            const contraseña = document.getElementById("contraseña").value;
+            const mensajeError = document.getElementById("mensajeError");
+
+            // Buscar en localStorage
+            const userData = JSON.parse(localStorage.getItem(username));
+
+            if (userData && userData.contraseña === contraseña) {
+                localStorage.setItem("usuarioActivo", username);
+                // Si es admin o trabajador, redirecciona diferente
+                if (username === "admin") {
+                    window.location.href = "Admin.html";
+                } else if (username === "trabajador") {
+                    window.location.href = "Trabajador.html";
+                } else {
+                    window.location.href = "index.html"; 
+                }
+            } else {
+                mensajeError.textContent = "Usuario o contraseña incorrectos";
+            }
+        });
+
+        (function precargarUsuarios() {
+            const usuarios = [
+                { nombre: "usuario", contraseña: "hola" },
+                { nombre: "trabajador", contraseña: "hola" },
+                { nombre: "admin", contraseña: "hola" }
+            ];
+
+            usuarios.forEach(({ nombre, contraseña }) => {
+                if (!localStorage.getItem(nombre)) {
+                    localStorage.setItem(nombre, JSON.stringify({ contraseña }));
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

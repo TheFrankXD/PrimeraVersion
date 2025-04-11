@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel del Administrador</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="body-2">
+  <div class="container-3">
+    <h2>Historial de Citas</h2>
+
+    <!-- Filtro por fecha -->
+    <label for="filtroFecha">Filtrar por fecha:</label>
+    <input type="date" id="filtroFecha">
+
+    <!-- Filtro por usuario -->
+    <label for="filtroUsuario">Filtrar por usuario:</label>
+    <select id="filtroUsuario">
+        <option value="">Todos</option>
+    </select>
+
+    <table id="tablaHistorial" border="1" style="width:100%; border-collapse: collapse; margin-top: 20px;">
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Tratamiento</th>
+          <th>Fecha</th>
+          <th>Hora</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+  <script>
+
+    //Nota: Desconozco porque falla el operador de filtrar por fecha, aún y solicitando ayuda de conocidos y IA's no funciono
+    //perdón (:|)
+    function llenarUsuariosUnicos(citas) {
+      const filtroUsuario = document.getElementById("filtroUsuario");
+      const usuariosUnicos = [...new Set(citas.map(c => c.cliente))];
+
+      filtroUsuario.innerHTML = '<option value="">Todos</option>';
+      usuariosUnicos.forEach(usuario => {
+        const option = document.createElement("option");
+        option.value = usuario;
+        option.textContent = usuario;
+        filtroUsuario.appendChild(option);
+      });
+    }
+
+    function formatearFecha(fecha) {
+      const [dia, mes, año] = fecha.split("/");
+      return `${año}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`; // formato YYYY-MM-DD
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const tabla = document.getElementById("tablaHistorial").querySelector("tbody");
+      const inputFecha = document.getElementById("filtroFecha");
+      const selectUsuario = document.getElementById("filtroUsuario");
+
+      function renderizarTabla() {
+        const citas = JSON.parse(localStorage.getItem("citas_trabajador")) || [];
+        const filtroFecha = inputFecha.value;
+        const filtroUsuario = selectUsuario.value;
+
+        llenarUsuariosUnicos(citas); // siempre actualizar la lista
+
+        tabla.innerHTML = ""; // limpiar tabla
+
+        const citasFiltradas = citas.filter(cita => {
+          const coincideFecha = filtroFecha
+            ? formatearFecha(cita.fecha) === filtroFecha
+            : true;
+            const coincideUsuario = filtroUsuario
+            ? cita.cliente === filtroUsuario
+            : true;
+          return coincideFecha && coincideUsuario;
+        });
+
+        if (citasFiltradas.length === 0) {
+          const filaVacia = document.createElement("tr");
+          filaVacia.innerHTML = `<td colspan="4">No hay citas para los filtros aplicados</td>`;
+          tabla.appendChild(filaVacia);
+          return;
+        }
+
+        citasFiltradas.forEach(cita => {
+          const fila = document.createElement("tr");
+          fila.innerHTML = `
+            <td>${cita.cliente}</td>
+            <td>${cita.tratamiento}</td>
+            <td>${cita.fecha}</td>
+            <td>${cita.hora}</td>
+          `;
+          tabla.appendChild(fila);
+        });
+      }
+
+      inputFecha.addEventListener("change", renderizarTabla);
+      selectUsuario.addEventListener("change", renderizarTabla);
+
+      // Mostrar todo al cargar
+      renderizarTabla();
+    });
+  </script>
+</body>
+</html>
+

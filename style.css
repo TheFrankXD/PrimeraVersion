@@ -1,0 +1,255 @@
+/* Estilos generales */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f4f4f4;
+}
+.body-2 {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f4;
+}
+/* Barra superior */
+.top-bar {
+    background: #444;
+    color: white;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.top-bar img {
+    height: 40px;
+    margin-left: 10px;
+}
+.top-bar .links {
+    margin-right: 10px;
+}
+.top-bar a {
+    color: white;
+    text-decoration: none;
+    margin-left: 15px;
+}
+
+/* Barra de navegación */
+.navbar {
+    background: #333;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    color: white;
+}
+.navbar ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: 20px;
+}
+.navbar ul li {
+    display: inline;
+}
+.navbar ul li a {
+    color: white;
+    text-decoration: none;
+    a:hover{
+        color: #f39c12;
+    }
+}
+
+/* Contenedor principal */
+.container {
+    display: flex;
+    padding: 20px;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.container-2 {
+    padding: 20px;
+    text-align: center;
+}
+
+.container-3 {
+    background: white;
+    padding: 20px;
+    margin: 50px auto;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+}
+
+.busqueda-box {
+    margin: 20px auto;
+    max-width: 500px;
+    display: flex;
+}
+.busqueda-box input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+.busqueda-box button {
+    padding: 10px;
+    background: #333;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+.seccion-ayuda {
+    background: white;
+    margin: 20px auto;
+    padding: 20px;
+    max-width: 600px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Secciones */
+.seccion-izquierda {
+    flex: 2;
+    padding: 20px;
+    border-right: 1px solid #ddd;
+}
+
+.seccion-derecha {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 280px; 
+    max-width: 400px; 
+}
+
+/* Cajas de contenido */
+.service-box {
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin-bottom: 20px;
+    background: white;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+.worker-box {
+    width: 100%;
+    max-width: 320px;
+}
+
+
+.service-box img, .worker-box img {
+    width: 100%;
+    height: auto;
+}
+
+.servicios .container {
+    display: flex;
+}
+
+/* Pie de página */
+.footer {
+    background: #333;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+select, input, button {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.button-Ayuda{
+    width: calc(20% - 20px);
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background: #333;
+    color: white;
+    cursor: pointer;
+    button:hover{
+        background: #555;
+    }
+}
+button {
+    background: #333;
+    color: white;
+    cursor: pointer;
+}
+button:hover {
+    background: #555;
+}
+a:hover {
+    color: #0004ff;
+}
+.titulo-tarjeta {
+    color: aliceblue;
+}
+.p-tarjeta{
+    color: aliceblue;
+}
+.tratamiento-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; 
+    gap: 20px; 
+}
+.tratamiento-box {
+    background: #333;
+    padding: 15px;
+    border-radius: 5px;
+    width: 250px;
+    text-align: center;
+    border: 1px solid #444;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+.tratamiento-box img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+.input-Login {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.button-Login {
+    width: 100%;
+    padding: 10px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background: #333;
+}
+.error {
+    color: red;
+    font-size: 14px;
+}
+.login-container {
+    background: white;
+    padding: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+.imagen-service img{
+    width: 50%;
+    height: auto;
+}

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Citas - Car Wash</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="Imagenes/icono3.png" type="image">
+
+    <style>
+        .mensaje {
+    color: green;
+    font-weight: bold;
+}
+
+.container-2 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 20px;
+}
+
+.container-3 {
+    padding: 15px;
+    border-radius: 5px;
+    text-align: center;
+    border: 1px solid #444;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <a href="index.html"><img src="Imagenes/logo2.jpg" alt=""></a>
+        <div class="links">
+            <a href="Ayuda.html"><Strong>Ayuda</Strong></a>
+            <a href="Login.html"><strong>Inicio de Sesión</strong></a>
+        </div>
+    </div>
+    <div class="navbar">
+        <ul>
+            <li><a href="Agendado.html"><strong>Agendar Cita</strong></a></li>
+            <li><a href="Horario.html"><strong>Ver Horarios</strong></a></li>
+            <li><a href="Tratamientos.html"><strong>Tratamientos</strong></a></li>
+            <li><a href="MisCitas.html"><strong>Mis Citas</strong></a></li>
+        </ul>
+    </div>
+    <h2 style="text-align: center;">Mis Citas</h2>
+    <div class="container">
+        <div class="container-2">
+            
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+    const usuario = localStorage.getItem("usuarioActivo");
+    const citas = JSON.parse(localStorage.getItem("citas_" + usuario)) || [];
+
+    const container = document.querySelector(".container-2");
+
+    if (citas.length > 0) {
+        // Mostrar todas las citas
+        citas.forEach((cita, index) => {
+            const divCita = document.createElement("div");
+            divCita.className = "container-3";
+            let estado = "";
+            if (cita.completado) {
+                estado = `<p class="estado-cita completado">✅ Cita completada el ${cita.fechaFinalizacion || ""}</p>`;
+            } else {
+                estado = `<p class="estado-cita pendiente">🕒 Cita pendiente</p>`;
+            }
+
+            let mensajeHTML = "";
+            if (cita.mensaje) {
+                mensajeHTML = `<p class="mensaje">${cita.mensaje}</p>`;
+            }
+
+            // Solo mostrar el formulario de edición si la cita no está completada
+            const formEdicion = cita.completado ? '' : `
+                <button onclick="mostrarFormularioEdicion(${index})">Editar</button>
+                <form id="form-edicion-${index}" style="display:none; margin-top:10px;">
+                    <label>Nuevo tratamiento:
+                        <select id="nuevo-tratamiento-${index}">
+                            <option value="normal">Lavado Normal</option>
+                            <option value="cera">Lavado con Cera</option>
+                            <option value="asiento">Lavado de Asientos</option>
+                            <option value="alfombra">Lavado de Alfombras</option>
+                            <option value="motor">Lavado de Motor</option>
+                            <option value="faros">Pulido de Faros</option>
+                            <option value="techo">Lavado de Techo</option>
+                            <option value="detallado">Detallado Completo</option>
+                        </select>
+                    </label><br>
+                    <label>Nueva hora: <input type="time" id="nueva-hora-${index}"></label><br><br>
+                    <button type="button" onclick="guardarCambios(${index})">Guardar Cambios</button>
+                    <button type="button" onclick="cancelarCita(${index})">Cancelar Cita</button> <!-- Botón para cancelar la cita -->
+                </form>
+            `;
+
+            divCita.innerHTML = `
+                <h3>Cita #${String(index + 1).padStart(3, '0')}</h3>
+                <p><strong>Tratamiento solicitado:</strong> ${cita.tratamiento}</p>
+                <p><strong>Fecha:</strong> ${cita.fecha}</p>
+                <p><strong>Hora de inicio:</strong> ${cita.hora}</p>
+                <p><strong>Hora estimada de recogida:</strong> ${calcularFin(cita.hora)}</p>
+                <p><strong>Trabajador asignado:</strong> Carlos Figueroa</p>
+                <p><strong>Contacto:</strong> +52 634 105 3007</p>
+                ${estado}
+                ${mensajeHTML}
+                ${formEdicion} <!-- Solo se muestra si la cita no está completada -->
+            `;
+
+            container.appendChild(divCita);
+        });
+    } else {
+        const p = document.createElement("p");
+        p.textContent = "No hay citas registradas.";
+        container.appendChild(p);
+    }
+
+    function calcularFin(horaInicio) {
+        const [horas, minutos] = horaInicio.split(":").map(Number);
+        const nuevaHora = new Date();
+        nuevaHora.setHours(horas + 1, minutos);
+        return nuevaHora.toTimeString().slice(0, 5); // "HH:MM"
+    }
+});
+
+function mostrarFormularioEdicion(index) {
+    document.getElementById("form-edicion-" + index).style.display = "block";
+}
+
+function guardarCambios(index) {
+    const nuevoTratamiento = document.getElementById("nuevo-tratamiento-" + index).value;
+    const nuevaHora = document.getElementById("nueva-hora-" + index).value;
+
+    if (!nuevaHora) {
+        alert("Por favor, selecciona una hora válida.");
+        return;
+    }
+
+    let usuario = localStorage.getItem("usuarioActivo");
+    let citas = JSON.parse(localStorage.getItem("citas_" + usuario)) || [];
+    let cita = citas[index];
+
+    // Acá empieza el cambio Proveido por ChatGPT
+    /*
+    let cita = citas[index];
+    const horaAnterior = cita.hora;
+    const fechaAnterior = cita.fecha;
+
+// Actualizamos los datos
+    cita.tratamiento = nuevoTratamiento;
+    cita.hora = nuevaHora;
+
+// Guardamos en citas_trabajador comparando con datos anteriores
+citasTrabajador = citasTrabajador.map(c => {
+    if (c.cliente === usuario && c.fecha === fechaAnterior && c.hora === horaAnterior) {
+        c.tratamiento = nuevoTratamiento;
+        c.hora = nuevaHora;
+    }
+    return c;
+});
+*/
+
+    // Aca termina
+
+    // Actualizamos los datos [Este es el que hasta donde recuerdo funcionaba]
+    
+    const citaId = cita.id;
+
+    cita.tratamiento = nuevoTratamiento;
+    cita.hora = nuevaHora;
+
+    localStorage.setItem("citas_" + usuario, JSON.stringify(citas));
+
+    // También actualizamos en citas_trabajador
+    let citasTrabajador = JSON.parse(localStorage.getItem("citas_trabajador")) || [];
+    citasTrabajador = citasTrabajador.map(c => {
+        if (c.id === citaId) {
+            c.tratamiento = nuevoTratamiento;
+            c.hora = nuevaHora;
+        }
+        return c;
+    });
+    
+    localStorage.setItem("citas_trabajador", JSON.stringify(citasTrabajador));
+
+    alert("✅ Cambios guardados correctamente.");
+    location.reload(); // Refrescamos
+}
+
+function cancelarCita(index) {
+    const usuario = localStorage.getItem("usuarioActivo");
+    let citas = JSON.parse(localStorage.getItem("citas_" + usuario)) || [];
+    let cita = citas[index];
+
+    // Comprobamos si la cita aún puede ser cancelada (no debe estar cerca de la hora)
+    const fechaCita = new Date(`${cita.fecha} ${cita.hora}`);
+    const ahora = new Date();
+
+    // Si la cita es dentro de menos de 1 hora, no podemos cancelarla
+    const diferenciaHoras = (fechaCita - ahora) / (1000 * 60 * 60); // Diferencia en horas
+
+    if (diferenciaHoras < 1) {
+        alert("❌ No se puede cancelar la cita, ya está demasiado cerca del horario.");
+        return;
+    }
+
+    // Eliminar la cita
+    citas.splice(index, 1);
+    localStorage.setItem("citas_" + usuario, JSON.stringify(citas));
+
+    // También actualizamos en citas_trabajador
+    let citasTrabajador = JSON.parse(localStorage.getItem("citas_trabajador")) || [];
+    citasTrabajador = citasTrabajador.filter(c => !(c.cliente === usuario && c.fecha === cita.fecha && c.hora === cita.hora));
+    localStorage.setItem("citas_trabajador", JSON.stringify(citasTrabajador));
+
+    alert("✅ Cita cancelada correctamente.");
+    location.reload(); // Refrescamos la página 
+}
+
+function actualizarCita(citaModificada) {
+    const citas = JSON.parse(localStorage.getItem("citas")) || [];
+    const citasTrabajador = JSON.parse(localStorage.getItem("citas_trabajador")) || [];
+
+    // Actualizar en citas
+    const index = citas.findIndex(c => c.id === citaModificada.id);
+    if (index !== -1) {
+        citas[index] = citaModificada;
+    }
+
+    // Actualizar en citas_trabajador
+    const indexTrabajador = citasTrabajador.findIndex(c => c.id === citaModificada.id);
+    if (indexTrabajador !== -1) {
+        citasTrabajador[indexTrabajador] = citaModificada;
+    }
+
+    localStorage.setItem("citas", JSON.stringify(citas));
+    localStorage.setItem("citas_trabajador", JSON.stringify(citasTrabajador));
+}
+    </script>
+</body>
+</html>

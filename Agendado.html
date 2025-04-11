@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar Cita - Car Wash</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="Imagenes/icono3.png" type="image/png">
+    <style>
+        #mensaje {
+            margin-top: 15px;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+        }
+        .exito {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <a href="index.html"><img src="Imagenes/logo2.jpg" alt="Logo"></a>
+        <div class="links">
+            <a href="Ayuda.html"><strong>Ayuda</strong></a>
+            <a href="Login.html"><strong>Inicio de Sesión</strong></a>
+        </div>
+    </div>
+    <div class="navbar">
+        <ul>
+            <li><a href="Agendado.html"><strong>Agendar Cita</strong></a></li>
+            <li><a href="Horario.html"><strong>Ver Horarios</strong></a></li>
+            <li><a href="Tratamientos.html"><strong>Tratamientos</strong></a></li>
+            <li><a href="MisCitas.html"><strong>Mis Citas</strong></a></li>
+        </ul>
+    </div>
+    <div class="container-3">
+        <h2>Selecciona un Tratamiento</h2>
+        <select id="tratamiento">
+            <option value="">-- Selecciona --</option>
+            <option value="normal">Lavado Normal</option>
+            <option value="cera">Lavado con Cera</option>
+            <option value="asiento">Lavado de Asientos</option>
+            <option value="alfombra">Lavado de Alfombras</option>
+            <option value="motor">Lavado de Motor</option>
+            <option value="faros">Pulido de Faros</option>
+            <option value="techo">Lavado de Techo</option>
+            <option value="detallado">Detallado Completo</option>
+        </select>
+        <label for="fecha">Fecha:</label>
+        <input type="date" id="fecha">
+        <label for="hora">Hora:</label>
+        <input type="time" id="hora">
+        <button id="boton-agendar" onclick="agendarCita()">Agendar Cita</button>
+        <p id="mensaje"></p>
+    </div>
+    <script>
+        function agendarCita() {
+        let tratamiento = document.getElementById("tratamiento").value;
+        let fecha = document.getElementById("fecha").value;
+        let hora = document.getElementById("hora").value;
+        let mensaje = document.getElementById("mensaje");
+        let usuario = localStorage.getItem("usuarioActivo");
+
+        //Verificamos que haya un usuario para operar, mediante la validación de usuario
+        if (!usuario) {
+        mensaje.textContent = "Para operar se requiere que inicie sesión.";
+        mensaje.className = "error";
+        mensaje.style.display = "block";
+        setTimeout(() => mensaje.style.display = "none", 3000);
+        return;
+        }
+
+        // Primero validamos que todos los campos estén llenos
+        if (!tratamiento || !fecha || !hora || !usuario) {
+            mensaje.textContent = "Por favor, completa todos los campos.";
+            mensaje.className = "error";
+            mensaje.style.display = "block";
+            setTimeout(() => mensaje.style.display = "none", 3000);
+            return;
+        }
+
+        // Luego validamos si la hora está dentro del rango permitido
+        if (!validarHora(hora)) {
+            mensaje.textContent = "La hora debe estar entre las 8:00 AM y las 4:00 PM.";
+            mensaje.className = "error";
+            mensaje.style.display = "block";
+            setTimeout(() => mensaje.style.display = "none", 3000);
+            return;
+        }
+
+        if (tratamiento && fecha && hora && usuario) {
+        // Validar que no exista una cita ya ocupando esa fecha/hora
+            let citasTrabajador = JSON.parse(localStorage.getItem("citas_trabajador")) || [];
+            let citaExistente = citasTrabajador.find(cita => cita.fecha === fecha && cita.hora === hora);
+
+            if (citaExistente) {
+                mensaje.textContent = "Ya hay una cita agendada en esa fecha y hora. Elige otro horario.";
+                mensaje.className = "error";
+            } else {
+                const nuevaCita = {
+                    id: crypto.randomUUID(), // <-- Esta línea es nueva proveida por ChatGPT para resolver incapacidad de editar porque no identificaba el que renovar.
+                    cliente: usuario,
+                    tratamiento,
+                    fecha,
+                    hora,
+                    tiempoEstimado: obtenerTiempoEstimado(tratamiento),
+                    completado: false
+            };
+
+            // Agregar a citas del usuario, reemplazando si ya tiene una en esa hora
+            let citasUsuario = JSON.parse(localStorage.getItem("citas_" + usuario)) || [];
+            citasUsuario = citasUsuario.filter(cita => !(cita.fecha === fecha && cita.hora === hora));
+            citasUsuario.push(nuevaCita);
+            localStorage.setItem("citas_" + usuario, JSON.stringify(citasUsuario));
+
+            // Agregar a citas del trabajador
+            citasTrabajador.push(nuevaCita);
+            localStorage.setItem("citas_trabajador", JSON.stringify(citasTrabajador));
+
+            mensaje.textContent = "¡Cita agendada con éxito!";
+            mensaje.className = "exito";
+            mensaje.style.display = "block";
+            setTimeout(() => mensaje.style.display = "none", 3000);
+        } 
+    } else {
+        mensaje.textContent = "Por favor, completa todos los campos.";
+        mensaje.className = "error";
+        mensaje.style.display = "block";
+        setTimeout(() => mensaje.style.display = "none", 3000);
+        }
+    }
+
+    function validarHora(hora) {
+        const horaApertura = "08:00";
+        const horaCierre = "16:00";
+        return hora >= horaApertura && hora <= horaCierre;
+    }
+
+    function obtenerTiempoEstimado(tratamiento) {
+        switch (tratamiento) {
+            case "normal": return "30 minutos";
+            case "cera": return "45 minutos";
+            case "asiento": return "1 hora";
+            case "alfombra": return "1 hora";
+            case "motor": return "30 minutos";
+            case "faros": return "15 minutos";
+            case "techo": return "30 minutos";
+            case "detallado": return "1 hora";
+            default: return "No definido";
+        }
+    }
+</script>
+</body>
+</html>
+
+
+
